@@ -14,9 +14,13 @@ Run today on laptops. Lift-and-shift to AWS later with the same Docker setup.
 - **Backups** — n8n CLI export/import scripts.
 - **Makefile** — easy commands for edge (local) and cloud.
 
-## Two‑laptop usage
-- Heavy laptop: run **MAIN** + infra 24/7 (`make edge`).
-- Light laptop: run only **WORKER(s)** pointing to the same Postgres/Redis (use the `compose.cloud.yml` style pointing to managed or heavy‑laptop endpoints). **Never run two MAINs at once.**
+## Two-laptop mode (your use case)
+- Heavy laptop: run make edge (starts MAIN + infra).
+- Light laptop: you have two choices:
+  1. Worker-only against heavy laptop (best): point env to the heavy laptop’s Postgres/Redis over VPN or tunnel and run a compose that only starts n8n-worker.
+  2. Emergency MAIN on light: only do this if the heavy MAIN is off (queue mode needs one MAIN). 
+
+> (If you want, I can add a `compose.worker.yml` that only runs `n8n worker` pointed at remote Redis/Postgres.)
 
 ## Quick start (Edge / Local)
 ```bash
@@ -40,7 +44,7 @@ make backup
 make restore IN=backups/<timestamp>
 ```
 
-## Cloud (AWS) path
+## Cloud upgrade path (when you’re ready)
 - **EC2 + Compose:** quickest. Create RDS (Postgres), ElastiCache (Redis), S3 bucket. Set envs in `infra/.env`. `make cloud` on the instance.
 - **ECS (Fargate):** push your images to ECR; run one `n8n-main` service + N workers; point to RDS/ElastiCache; put ALB/Cloudflare in front of Traefik.
 

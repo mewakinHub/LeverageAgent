@@ -1,27 +1,32 @@
-SHELL := /bin/bash
-
-.PHONY: up down logs build tunnel edge cloud
+.PHONY: edge edge-down logs ps build-api push-api backup restore cloud cloud-down
 
 edge:
-	docker compose -f docker/compose.edge.yml --env-file .env up -d
+	docker compose -f infra/docker/compose.edge.yml --env-file infra/.env up -d --build
 
 edge-down:
-	docker compose -f docker/compose.edge.yml --env-file .env down
+	docker compose -f infra/docker/compose.edge.yml --env-file infra/.env down
 
 cloud:
-	docker compose -f docker/compose.cloud.yml --env-file .env up -d
+	docker compose -f infra/docker/compose.cloud.yml --env-file infra/.env up -d --build
 
 cloud-down:
-	docker compose -f docker/compose.cloud.yml --env-file .env down
+	docker compose -f infra/docker/compose.cloud.yml --env-file infra/.env down
 
 logs:
-	docker compose -f docker/compose.edge.yml logs -f --tail 100
+	docker compose -f infra/docker/compose.edge.yml logs -f --tail 200
+
+ps:
+	docker compose -f infra/docker/compose.edge.yml ps
 
 build-api:
-	docker build -t leverage/langgraph-api:dev ./services/langgraph-api
+	docker build -t leverage/langgraph-api:dev ./infra/services/langgraph-api
+
+push-api:
+	docker tag leverage/langgraph-api:dev YOURUSER/leverage-langgraph:dev
+	docker push YOURUSER/leverage-langgraph:dev
 
 backup:
-	./scripts/backup.sh
+	bash infra/scripts/backup.sh
 
 restore:
-	./scripts/restore.sh $(PATH)
+	bash infra/scripts/restore.sh $(IN)

@@ -1,0 +1,8 @@
+tunnel: leverageagent-dev
+credentials-file: /etc/cloudflared/credentials.json
+ingress:
+  - hostname: n8n.${PUBLIC_DOMAIN}
+    service: http://traefik:80
+  - hostname: api.${PUBLIC_DOMAIN}
+    service: http://traefik:80
+  - service: http_status:404

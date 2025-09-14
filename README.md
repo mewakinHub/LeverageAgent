@@ -20,7 +20,7 @@ Run today on laptops. Lift-and-shift to AWS later with the same Docker setup.
   1. Worker-only against heavy laptop (best): point env to the heavy laptop’s Postgres/Redis over VPN or tunnel and run a compose that only starts n8n-worker.
   2. Emergency MAIN on light: only do this if the heavy MAIN is off (queue mode needs one MAIN). 
 
-> (If you want, I can add a compose.worker.yml that only runs n8n worker pointed at remote Redis/Postgres.)
+> (If you want, I can add a `compose.worker.yml` that only runs `n8n worker` pointed at remote Redis/Postgres.)
 
 ## Quick start (Edge / Local)
 ```bash

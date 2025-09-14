@@ -44,7 +44,7 @@ make backup
 make restore IN=backups/<timestamp>
 ```
 
-## Cloud (AWS) path
+## Cloud upgrade path (when you’re ready)
 - **EC2 + Compose:** quickest. Create RDS (Postgres), ElastiCache (Redis), S3 bucket. Set envs in `infra/.env`. `make cloud` on the instance.
 - **ECS (Fargate):** push your images to ECR; run one `n8n-main` service + N workers; point to RDS/ElastiCache; put ALB/Cloudflare in front of Traefik.
 

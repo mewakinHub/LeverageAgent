@@ -2,9 +2,8 @@
 
 This guide assumes you have **Docker Desktop** installed. If not, install it first (Mac/Windows/Linux).
 
-## 1) Get the project
-- Use the repo you already have, and copy in the files from the previous ZIP (“LeverageAgent-reboot.zip”).  
-- You should have a folder like this:
+## 1) 
+- 
 ```
 LeverageAgent/
   infra/

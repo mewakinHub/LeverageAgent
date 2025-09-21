@@ -76,6 +76,7 @@ services:
       QUEUE_BULL_REDIS_HOST: redis
       QUEUE_BULL_REDIS_PORT: 6379
       N8N_LOG_LEVEL: ${N8N_LOG_LEVEL:-info}
+      N8N_SECURE_COOKIE: false
     networks: [proxy]
     labels:
       - "traefik.enable=true"

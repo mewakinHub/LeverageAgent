@@ -64,11 +64,18 @@ make edge
 
 # or at the project root as `make -C source edge`
 ```
-Wait until Docker finishes pulling images. Then open these in your browser:
+> Compose file Creates a private Docker network called proxy and a few volumes to persist data:
+- Starts Postgres (data volume), Redis, MinIO (file storage), Qdrant (vectors).
+- Start n8n-main (the web UI) and n8n-worker (does background jobs).
+- Traefik (traffic router) on port 80 → so `http://*.localhost` goes to the right app.
+  - proxy.localhost → Traefik dashboard
+- Starts your LangGraph API sample `(api.localhost/health)`
+
+> Wait until Docker finishes pulling images. Then open these in your browser:
 - **n8n editor:** http://n8n.localhost  
 - **API health:** http://api.localhost/health  
-- **MinIO console:** http://minio.localhost  
-- **Qdrant REST:** http://qdrant.localhost
+- **MinIO console(S3-like file storage):** http://minio.localhost  
+- **Qdrant REST(vector DB):** http://qdrant.localhost
 
 If n8n asks to create an account, do it once.
 
@@ -81,9 +88,14 @@ In n8n:
 5. Click **Activate** to let it run on schedule/webhook later.
 
 ## 5) Stopping and starting again
-- Stop: `docker compose -f infra/docker/compose.edge.yml down` (or `make edge-down`).
+- Stop cleanly(but keep data): `docker compose -f infra/docker/compose.edge.yml down` (or `make edge-down`).
+- Reset everything (deletes volumes/data): `docker compose down -v`
 - Start: `make edge` again.
 - Your data is kept in Docker volumes (Postgres/MinIO/Qdrant).
+```bash
+make logs      # follow logs (Ctrl+C to stop viewing)
+make ps        # list running services in the stack
+```
 
 ## 6) Backups (recommended)
 Export your n8n stuff (workflows + credentials) into the `backups/` folder:

@@ -59,8 +59,8 @@ services:
       - "traefik.http.routers.qdrant.rule=Host(`qdrant.localhost`)"
       - "traefik.http.services.qdrant.loadbalancer.server.port=6333"
   n8n-main:
-    # image: docker.n8n.io/n8nio/n8n:latest
-    image: docker.n8n.io/n8nio/n8n:1.52.0
+    image: docker.n8n.io/n8nio/n8n:latest
+    # image: docker.n8n.io/n8nio/n8n:1.52.0
     depends_on: [postgres, redis]
     # optional: expose direct port so other laptop on same Wi-Fi can open the UI
     ports:
@@ -86,7 +86,7 @@ services:
       - "traefik.http.routers.n8n.rule=Host(`n8n.localhost`)"
       - "traefik.http.services.n8n.loadbalancer.server.port=5678"
   n8n-worker:
-    image: docker.n8n.io/n8nio/n8n:1.52.0
+    image: docker.n8n.io/n8nio/n8n:latest
     depends_on: [postgres, redis]
     command: ["worker"]              # <-- IMPORTANT (not ["n8n","worker"])
     restart: unless-stopped

@@ -56,7 +56,7 @@ PY
 
 > Tip: Don’t share `.env` publicly. (using .gitignore)
 
-## 3) Start everything (local)
+## 3) Start everything (local on wsl)
 From the repo root:
 ```bash
 cd ..   # go back to /source if you are still in infra/
@@ -71,11 +71,16 @@ make edge
   - proxy.localhost → Traefik dashboard
 - Starts your LangGraph API sample `(api.localhost/health)`
 
-> Wait until Docker finishes pulling images. Then open these in your browser:
-- **n8n editor:** http://n8n.localhost  
+> Wait until Docker finishes pulling images. Then open these in your browser:  
 - **API health:** http://api.localhost/health  
 - **MinIO console(S3-like file storage):** http://minio.localhost  
 - **Qdrant REST(vector DB):** http://qdrant.localhost
+
+- **n8n editor(port 5679, bypassing Traefik):** 
+  - http://n8n.localhost (unable to use, due to no `N8N_SECURE_COOKIE=false`)
+  - http://localhost:5678 (only on the light laptop itself)
+  - http://<light-laptop-IP>:5678 if you exposed port 5678 in compose.edge.yml (same-Wi-Fi)
+    - `ipconfig` to get ip addr
 
 If n8n asks to create an account, do it once.
 
@@ -88,8 +93,9 @@ In n8n:
 5. Click **Activate** to let it run on schedule/webhook later.
 
 ## 5) Stopping and starting again
-- Stop cleanly(but keep data): `docker compose -f infra/docker/compose.edge.yml down` (or `make edge-down`).
-- Reset everything (deletes volumes/data): `docker compose down -v`
+- Stop cleanly(but keep data): `docker compose -f infra/docker/compose.edge.yml --env-file infra/.env down` (or `make edge-down`).
+- Reset everything (deletes volumes/data): `docker compose -f infra/docker/compose.edge.yml --env-file infra/.env down -v`
+  - docker volume rm leverage-edge_pg_data
 - Start: `make edge` again.
 - Your data is kept in Docker volumes (Postgres/MinIO/Qdrant).
 ```bash
@@ -98,7 +104,11 @@ make ps        # list running services in the stack
 ```
 
 ## 6) Backups (recommended)
-Export your n8n stuff (workflows + credentials) into the `backups/` folder:
+Export your n8n stuff (workflows + credentials) into the `backups/` folder(JSON file on disk) for:
+- Spinning up a new device and importing your logic/creds
+  - New device from Git = different containers/volumes (new empty volumes)
+- Versioning your workflows over time instead of git(code-based).
+**Note**: credentials export is encrypted with your N8N_ENCRYPTION_KEY. You must use the same key on the new device to import successfully.
 ```bash
 make backup
 # commit backups/ to Git if you want history
@@ -154,14 +164,25 @@ Copy from **figjam_architecture.txt** (in this folder). It contains the high‑l
 
 ---
 
-## Cheat sheet
-```bash
-make edge        # start local stack
-make edge-down   # stop local stack
-make logs        # follow logs
-make ps          # list services
-make backup      # export n8n workflows & credentials
-make restore IN=backups/<timestamp>
-```
+## Do you *need* Postgres & Redis?
 
-You’re done — build your workflows, then grow as needed. Keep it simple.
+* **Postgres** – stores n8n’s **workflows, users, credentials (encrypted), run history, settings**.
+
+  * **Yes, you need a database.** In our stack we use **Postgres**. (n8n can also use SQLite for tiny demos, but Postgres is safer and ready for growth.)
+* **Redis** – only needed when you use **Queue Mode** (the mode our compose uses). It’s the **job queue** that lets n8n scale with **workers** (parallel jobs, multi-machine later).
+
+  * If you stick to **one process** (no workers), you can run n8n in **Regular Mode** and **skip Redis**.
+
+---
+
+## What about MinIO, Qdrant, and the LangGraph API?
+
+You only start these when your use case needs them:
+
+| Service                           | What it does                                                 | Do you need it now?                                     | Typical use cases                                                           |
+| --------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------- | --------------------------------------------------------------------------- |
+| **MinIO** (S3-compatible storage) | Stores **big files** (videos, zips, datasets) outside the DB | **No**, unless you’re saving large files                | Content repurposing pipelines, exporting zips/CSVs, media storage           |
+| **Qdrant** (vector DB)            | **Embeddings / semantic search** for RAG                     | **No**, unless you’re doing retrieval/semantic features | “Find similar content,” knowledge base Q\&A, dedupe by meaning              |
+| **LangGraph API** (FastAPI)       | Your **Python/AI code** running as a small web service       | **No**, if n8n nodes are enough for now                 | Custom AI logic, heavy processing, calling local models, special algorithms |
+
+> TL;DR: you can stay very light: **Postgres + n8n** (and optionally **Redis** if you want queue/parallel workers). Turn on MinIO/Qdrant/LangGraph only when your features require them.

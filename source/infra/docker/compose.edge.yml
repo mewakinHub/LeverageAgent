@@ -27,7 +27,7 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-leverage}
+      POSTGRES_DB: ${POSTGRES_DB:-leverage} # fallback to leverage if not set
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     volumes:
@@ -59,8 +59,12 @@ services:
       - "traefik.http.routers.qdrant.rule=Host(`qdrant.localhost`)"
       - "traefik.http.services.qdrant.loadbalancer.server.port=6333"
   n8n-main:
-    image: docker.n8n.io/n8nio/n8n:latest
+    # image: docker.n8n.io/n8nio/n8n:latest
+    image: docker.n8n.io/n8nio/n8n:1.52.0
     depends_on: [postgres, redis]
+    # optional: expose direct port so other laptop on same Wi-Fi can open the UI
+    ports:
+      - "5678:5678"
     environment:
       N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
       N8N_HOST: n8n.localhost
@@ -69,35 +73,35 @@ services:
       DB_TYPE: postgresdb
       DB_POSTGRESDB_HOST: postgres
       DB_POSTGRESDB_PORT: 5432
-      DB_POSTGRESDB_DATABASE: ${POSTGRES_DB:-leverage}
-      DB_POSTGRESDB_USER: ${POSTGRES_USER:-postgres}
-      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      DB_POSTGRESDB_DATABASE: ${POSTGRES_DB}
+      DB_POSTGRESDB_USER: ${POSTGRES_USER}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
       EXECUTIONS_MODE: queue
       QUEUE_BULL_REDIS_HOST: redis
       QUEUE_BULL_REDIS_PORT: 6379
-      N8N_LOG_LEVEL: ${N8N_LOG_LEVEL:-info}
-      N8N_SECURE_COOKIE: false
+      N8N_LOG_LEVEL: ${N8N_LOG_LEVEL}
     networks: [proxy]
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.n8n.rule=Host(`n8n.localhost`)"
       - "traefik.http.services.n8n.loadbalancer.server.port=5678"
   n8n-worker:
-    image: docker.n8n.io/n8nio/n8n:latest
+    image: docker.n8n.io/n8nio/n8n:1.52.0
     depends_on: [postgres, redis]
-    command: ["n8n","worker"]
+    command: ["worker"]              # <-- IMPORTANT (not ["n8n","worker"])
+    restart: unless-stopped
     environment:
       N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
       DB_TYPE: postgresdb
       DB_POSTGRESDB_HOST: postgres
       DB_POSTGRESDB_PORT: 5432
-      DB_POSTGRESDB_DATABASE: ${POSTGRES_DB:-leverage}
-      DB_POSTGRESDB_USER: ${POSTGRES_USER:-postgres}
-      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      DB_POSTGRESDB_DATABASE: ${POSTGRES_DB}
+      DB_POSTGRESDB_USER: ${POSTGRES_USER}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
       EXECUTIONS_MODE: queue
       QUEUE_BULL_REDIS_HOST: redis
       QUEUE_BULL_REDIS_PORT: 6379
-      N8N_LOG_LEVEL: ${N8N_LOG_LEVEL:-info}
+      N8N_LOG_LEVEL: ${N8N_LOG_LEVEL}
     networks: [proxy]
   langgraph-api:
     build:

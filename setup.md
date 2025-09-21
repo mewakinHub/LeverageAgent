@@ -2,35 +2,67 @@
 
 This guide assumes you have **Docker Desktop** installed. If not, install it first (Mac/Windows/Linux).
 
-## 1) 
+## 1) project structure
 - 
 ```
-LeverageAgent/
+source/
   infra/
-    docker/compose.edge.yml
-    services/langgraph-api/...
-    .env.example
-  Makefile
+    docker/
+      compose.edge.yml   # local stack (Traefik + n8n + Postgres + Redis + MinIO + Qdrant + API)
+      compose.cloud.yml  # cloud stack (later, with AWS services)
+    services/
+      langgraph-api/     # a tiny FastAPI you can extend (AI / logic)
+    scripts/
+      backup.sh          # export n8n workflows + credentials
+      restore.sh         # import them back
+    .env.example         # your settings template (copy to .env)
+  Makefile               # easy commands (make edge / cloud / backup)
   ...
 ```
+
+> Installing make on Windows (if you want Makefile workflow)
+- Scoop:
+  ```
+  Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+  iwr -useb get.scoop.sh | iex
+  scoop install make
+  ```
+- or Chocolatey:
+  ```
+  choco install make
+  ```
+- or use WSL (install Ubuntu and use make there).
 
 ## 2) Create your settings file
 We use a simple **.env** file to tell services how to connect.
 
 ```bash
-cd LeverageAgent/infra
+cd source/infra
 cp .env.example .env
+
 # generate a secret key ONCE and paste it in .env for N8N_ENCRYPTION_KEY
+
+# Mac/Linux: 
 openssl rand -hex 32
+
+# Window:Windows PowerShell (no Python/OpenSSL)
+-join ((1..32 | ForEach-Object { '{0:x2}' -f (Get-Random -Max 256) }))
+
+# Any OS (Python present):
+python - << 'PY'
+import secrets; print(secrets.token_hex(32))
+PY
 ```
 
-> Tip: Don’t share `.env` publicly.
+> Tip: Don’t share `.env` publicly. (using .gitignore)
 
 ## 3) Start everything (local)
 From the repo root:
 ```bash
-cd ..   # go back to project root if you are still in infra/
+cd ..   # go back to /source if you are still in infra/
 make edge
+
+# or at the project root as `make -C source edge`
 ```
 Wait until Docker finishes pulling images. Then open these in your browser:
 - **n8n editor:** http://n8n.localhost  

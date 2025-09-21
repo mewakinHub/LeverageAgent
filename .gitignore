@@ -1,0 +1,43 @@
+# Ignore local environment files
+# IMPORTANT: We use `.env` for local secrets and service connections — don't commit. (anywhere in the repo)
+.env
+# Allow the example env file in the repo
+!.env.example
+
+# Python artifacts
+env/
+__pycache__/ 
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+venv/
+ENV/
+build/
+dist/
+*.egg-info/
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# VS Code
+.vscode/
+
+# JetBrains
+.idea/
+
+# Mac/Linux system files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Local editor swap / backup files
+*~
+*.swp

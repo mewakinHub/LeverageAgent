@@ -18,6 +18,7 @@ logs:
 ps:
 	docker compose -f infra/docker/compose.edge.yml ps
 
+# build image w/ repository/name as leverage/langgraph-api and dev tag
 build-api:
 	docker build -t leverage/langgraph-api:dev ./infra/services/langgraph-api
 

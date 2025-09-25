@@ -96,12 +96,13 @@ In n8n:
 - Stop cleanly(but keep data): `docker compose -f infra/docker/compose.edge.yml --env-file infra/.env down` (or `make edge-down`).
 - Reset everything (deletes volumes/data): `docker compose -f infra/docker/compose.edge.yml --env-file infra/.env down -v`
   - docker volume rm leverage-edge_pg_data
-- Start: `make edge` again.
+- Start: `make edge` again. (no need to down though, it already rebuilds only what change)
 - Your data is kept in Docker volumes (Postgres/MinIO/Qdrant).
-```bash
-make logs      # follow logs (Ctrl+C to stop viewing)
-make ps        # list running services in the stack
-```
+- no need to use build-api cuz we already build it in compose
+  ```bash
+  make build-api
+  make push-api
+  ```
 
 ## 6) Backups (recommended)
 Export your n8n stuff (workflows + credentials) into the `backups/` folder(JSON file on disk) for:

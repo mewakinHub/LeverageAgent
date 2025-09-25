@@ -60,7 +60,7 @@ services:
       - "traefik.http.services.qdrant.loadbalancer.server.port=6333"
   n8n-main:
     image: docker.n8n.io/n8nio/n8n:latest
-    # image: docker.n8n.io/n8nio/n8n:1.52.0
+    restart: unless-stopped
     depends_on: [postgres, redis]
     # optional: expose direct port so other laptop on same Wi-Fi can open the UI
     ports:
@@ -117,3 +117,4 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=Host(`api.localhost`)"
       - "traefik.http.services.api.loadbalancer.server.port=8000"
+        # http://langgraph-api:8000/yt/subtitles

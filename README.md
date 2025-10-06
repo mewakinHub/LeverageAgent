@@ -1,11 +1,13 @@
 # LeverageAgent — Simple Edge→Cloud Automation Stack
+> PURPOSE: For prototyping and private use, not product
 > **Goal:** Run everything on your **heavy laptop** today, and move to **cloud** later without changing how you work. Keep things simple.
 
 **Start here →** See **[setup.md](./setup.md)** for a super-easy, step‑by‑step guide.
 
 ## What’s inside (plain English)
-- **n8n (the conductor):** A no‑code/low‑code tool that *connects steps together* (triggers → actions). We use it to schedule, call APIs, and run jobs in order.
-- **LangGraph / LangChain API (the worker):** A tiny FastAPI service where you put Python code that does the “smart” work (AI, analysis, etc.). n8n calls this.
+- **n8n (the conductor):** main orchestrator for each workflow
+- **LangGraph / LangChain API (the worker):** microservices
+
 - **Postgres (memory):** Remembers n8n workflows and history.
 - **Redis (queue):** Helps share work between machines/workers.
 - **MinIO / S3 (files):** Stores big files (videos, exports, etc.).

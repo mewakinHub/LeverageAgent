@@ -118,3 +118,11 @@ services:
       - "traefik.http.routers.api.rule=Host(`api.localhost`)"
       - "traefik.http.services.api.loadbalancer.server.port=8000"
         # http://langgraph-api:8000/yt/subtitles
+
+  crawler-api:
+    build: ../services/crawler-api
+    profiles: ["edge","cloud"]
+    restart: unless-stopped
+    ports:
+      - "8080:8080" # for local testing; n8n can call via service name
+
